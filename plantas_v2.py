@@ -40,29 +40,71 @@ calavera = """
 
 
 def elemento_adentro(elemento, lista, resultado):
+    """
+    Se encarga de verificar si un elemento está contenido en una lista.
+
+    ENTRADAS: Un elemento de cualquier tipo, una lista que contiene datos
+    de cualquier tipo y el resultado de si está adentro o no.
+    SALIDAS: Retornará True si se encontró el elemento adentro de la lista
+    de no ser así, se retornará False.
+    RESTRICCIONES: Las restricciones deben ser impuestas por la función que
+    se encargue de llamar a esta función.
+    """
+    # Si la lista queda vacía entonces se retorna el resultado.
     if lista == []:
         return resultado
+    # De no ser así, se seguirá buscando para ver cual es el resultado.
     else:
+        # Si el elemento es igual al primer elemento de la lista entonces
+        # es por que se encontró, el resultado pasa a ser True y la lista
+        # va recortando su cola.
         if elemento == lista[0]:
             return elemento_adentro(elemento, lista[1:], True)
+        # De no ser así, el resultado se mantendrá y además la lista va
+        # recortando su cola.
         else:
             return elemento_adentro(elemento, lista[1:], resultado)
 
 
 def numero_plantas():
+    """
+    Se encarga de revisar si la cantidad de plantas es un valor que cumpla
+    con las restricciones.
+
+    ENTRADAS: No hay entradas. Se usa para crear el número de plantas.
+    SALIDAS: Se retornará el valor de la cantidad de plantas.
+    RESTRICCIONES: El input debe estar dentro de la lista de las opciones
+    válidas.
+    """
+    # Se pregunta por la cantidad de plantas
     ask_plantas = input("Inserte un número de plantas: ")
+    # Se crea una lista que contiene las opciones válidas
     opciones_validas = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    # Se revisa que la entrada del usuario se encuentre entre las opciones
+    # válidas.
     if elemento_adentro(ask_plantas, opciones_validas, False) is False:
-        print_en_colores("Error: La planta debe ser un número entre 1 y 8, "
-                         "intente de nuevo.", "r")
+        print_en_colores("Error: La cantidad de plantas debe ser un número "
+                         "entre 1 y 8, intente de nuevo.", "r")
         return numero_plantas()
+    # Si la entrada se encuentre entre las opciones válidas entonces se
+    # retornará el valor de la entrada como si fuera de tipo entero.
     else:
         return int(ask_plantas)
 
 
 def generar_opciones_validas(numero, resultado=[]):
+    """
+    Genera las opciones válidas según una cantidad de plantas.
+
+    ENTRADAS: Un número entero que representa la cantidad de plantas
+    y el resultado que es una lista con las opciones válidas.
+    """
+    # Si el número queda reducido a cero entonces es la condición de parada
+    # y se retorna el resultado.
     if numero == 0:
         return resultado
+    # De no ser así, se seguirá hasta poder hacer una lista con todos las
+    # opciones válidas.
     else:
         return generar_opciones_validas(numero-1, [str(numero)]+resultado)
 
