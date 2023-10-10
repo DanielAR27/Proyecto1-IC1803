@@ -39,6 +39,34 @@ calavera = """
 """
 
 
+def elemento_adentro(elemento, lista, resultado):
+    if lista == []:
+        return resultado
+    else:
+        if elemento == lista[0]:
+            return elemento_adentro(elemento, lista[1:], True)
+        else:
+            return elemento_adentro(elemento, lista[1:], resultado)
+
+
+def numero_plantas():
+    ask_plantas = input("Inserte un número de plantas: ")
+    opciones_validas = ["1", "2", "3", "4", "5", "6", "7", "8"]
+    if elemento_adentro(ask_plantas, opciones_validas, False) is False:
+        print_en_colores("Error: La planta debe ser un número entre 1 y 8, "
+                         "intente de nuevo.", "r")
+        return numero_plantas()
+    else:
+        return int(ask_plantas)
+
+
+def generar_opciones_validas(numero, resultado=[]):
+    if numero == 0:
+        return resultado
+    else:
+        return generar_opciones_validas(numero-1, [str(numero)]+resultado)
+
+
 def print_en_colores(texto, color):
     """
     Imprime un texto en un color a escogencia del programador.
@@ -276,7 +304,7 @@ def preguntar_si_o_no(mensaje):
         return pregunta_si_o_no
 
 
-def preguntar_planta(plantas):
+def preguntar_planta(plantas, opciones_validas):
     """
     ENTRADAS:
     :int plantas: Un número entero de plantas.
@@ -288,18 +316,18 @@ def preguntar_planta(plantas):
     puede ser menor que uno.
     """
     # Se pregunta al usuario por un número entero que representa una planta.
-    planta_id = int(input("Inserte el número de planta: "))
+    planta_id = input("Inserte el número de planta: ")
     # Si ese valor es menor que uno o mayor que el número de plantas, se
     # retornará un error y se volverá a pedir al usuario que inserte un número
     # válido.
-    if planta_id < 1 or planta_id > plantas:
-        print_en_colores("Error #2: El identificador debe ser un número válido"
+    if elemento_adentro(planta_id, opciones_validas, False) is False:
+        print_en_colores("Error: El identificador debe ser un número válido"
                          ", intente de nuevo.", "r")
-        return preguntar_planta(plantas)
+        return preguntar_planta(plantas, opciones_validas)
     # Si el número de la planta se encuentra entre uno y el número de plantas,
     # se retornará el número.
     else:
-        return planta_id
+        return int(planta_id)
 
 
 def revisar_plantas(agua, nutrientes, cantidad_plantas):
@@ -326,7 +354,7 @@ def revisar_plantas(agua, nutrientes, cantidad_plantas):
 
 
 def menu_interactivo(turno, agua=[], nutrientes=[], plantas=0,
-                     bonus_over=False):
+                     bonus_over=False, opciones_validas=[]):
     """
     ENTRADAS:
     :int turno: Un número que indica el turno que está jugando el usuario.
@@ -349,25 +377,17 @@ def menu_interactivo(turno, agua=[], nutrientes=[], plantas=0,
     # Si el turno es cero, se empezará por crear la información de las plantas.
     if turno == 0:
         # Se pide al usuario que inserte el número de plantas.
-        num_plants = int(input("Inserte el número de plantas: "))
-        # Si el número es menor que uno o mayor que ocho se genera un error.
-        # Se llama a la función con el turno en cero para volver a pedir la
-        # información al usuario.
-        if num_plants < 1 or num_plants > 8:
-            print_en_colores("Error #0: Debe seleccionar un número"
-                             " entre 1 y 8.", "r")
-            return menu_interactivo(0)
-        # Si el número de plantas es un número válido, se procede a crear
-        # toda la información de las plantas.
-        else:
-            # Se crea una lista de agua según el número de plantas.
-            agua = crear_comida(num_plants)
-            # Se crea una lista de nutrientes según el número de plantas.
-            nutrientes = crear_comida(num_plants)
-            # Se llamará recursivamente a la función, el turno incrementará
-            # en uno, las listas son actualizadas y el número de plantas se
-            # conserva. La ronda bonus no habrá comenzado todavía.
-            return menu_interactivo(turno+1, agua, nutrientes, num_plants)
+        num_plants = numero_plantas()
+        # Se crea una lista de agua según el número de plantas.
+        agua = crear_comida(num_plants)
+        # Se crea una lista de nutrientes según el número de plantas.
+        nutrientes = crear_comida(num_plants)
+        validas = generar_opciones_validas(num_plants)
+        # Se llamará recursivamente a la función, el turno incrementará
+        # en uno, las listas son actualizadas y el número de plantas se
+        # conserva. La ronda bonus no habrá comenzado todavía.
+        return menu_interactivo(turno+1, agua, nutrientes, num_plants,
+                                opciones_validas=validas)
     # Si el turno es distinto de cero, entonces el juego puede comenzar.
     else:
         # Lo primero es revisar si alguna planta está muerta por agua o por
@@ -414,7 +434,7 @@ def menu_interactivo(turno, agua=[], nutrientes=[], plantas=0,
                 # Se pregunta por la comida que se desea agregar.
                 comida = preguntar_comida()
                 # Se pregunta por la planta a agregar comida.
-                planta = preguntar_planta(plantas)
+                planta = preguntar_planta(plantas, opciones_validas)
                 # Si la comida es "a" se le agregará agua y se le quita
                 # nutrientes.
                 if comida == "a":
@@ -435,7 +455,8 @@ def menu_interactivo(turno, agua=[], nutrientes=[], plantas=0,
                 # Se llamará recursivamente a la función, el turno incrementará
                 # en uno, las listas son actualizadas y el número de plantas se
                 # conserva. La ronda bonus no habrá comenzado todavía.
-                return menu_interactivo(turno+1, agua, nutrientes, plantas)
+                return menu_interactivo(turno+1, agua, nutrientes, plantas,
+                                        opciones_validas=opciones_validas)
             # Para caso contrario, se entrará en una ronda bonus en los turnos
             # donde el número de turno sea divisible entre cinco.
             else:
@@ -466,7 +487,8 @@ def menu_interactivo(turno, agua=[], nutrientes=[], plantas=0,
                 # las listas son actualizadas y el número de plantas se
                 # conserva. La ronda bonus ya habrá finalizado.
                 return menu_interactivo(turno, agua, nutrientes,
-                                        plantas, True)
+                                        plantas, True,
+                                        opciones_validas=opciones_validas)
 
 
 def ronda_abono(lista_comida, random_decision):
